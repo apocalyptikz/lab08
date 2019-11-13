@@ -92,42 +92,42 @@ namespace DS {
 	template<typename Item>
 	bool bstree<Item>::bst_remove(const Item& target, binary_tree_node<Item>*& root_ptr)
 	{
-		if (root_ptr == nullptr)
-			return false;
-		if (root_ptr->data() == target)
-		{
-			if (root_ptr->is_leaf())
-				root_ptr = nullptr;
-			
-			if (root_ptr->left() == nullptr && root_ptr->right() != nullptr)
-			{
-				binary_tree_node<Item>* temp = root_ptr->right();
-				root_ptr->set_data(root_ptr->right()->data());
-				delete temp;
-			}
-
-			if (root_ptr->left() != nullptr && root_ptr->right() == nullptr)
-			{
-				binary_tree_node<Item>* temp = root_ptr->right();
-				root_ptr->set_data(root_ptr->left()->data());
-				delete temp;
-			}
-			
-			if (root_ptr->left() != nullptr && root_ptr->right() != nullptr)
-			{
-				binary_tree_node<Item>* newValue = maxNode(root_ptr->left());
-				root_ptr = newValue;
-				delete newValue;
-				//binary_tree_node<Item>* extraVal = minNode(root_ptr->left());
-				//bst_remove(newValue->left()->data(), root_ptr->left());	
-			}
-				
-
-			return true;
-		}
-		if (root_ptr->data() <= target)
+	    //Target not in subtree or empty
+	    if (root_ptr == nullptr || !in_bst(target))
+	        return false;
+	    //Move right
+		if (root_ptr->data() < target)
 			return bst_remove(target, root_ptr->right());
-		return bst_remove(target, root_ptr->left());
+		//Move left
+		if (root_ptr->data() > target)
+		    return bst_remove(target, root_ptr->left());
+		//No children, just delete
+		if (root_ptr->is_leaf())
+        {
+            root_ptr = nullptr;
+            return true;
+        }
+		//One child on right
+		if (root_ptr->left() == nullptr && root_ptr->right())
+        {
+		    Item temp = root_ptr->right()->data();
+		    root_ptr->data() = temp;
+		    return bst_remove(temp, root_ptr->right());
+        }
+		//One child on left
+		if (root_ptr->left() && root_ptr->right() == nullptr)
+        {
+		    Item temp = root_ptr->left()->data();
+		    root_ptr->data() = temp;
+		    return bst_remove(temp, root_ptr->left());
+        }
+		//Two children
+		if (root_ptr->left() && root_ptr->right())
+        {
+		    binary_tree_node<Item>* temp = minNode(root_ptr->right());
+		    root_ptr->data() = temp->data();
+		    return bst_remove(temp->data(), root_ptr->right());
+        }
 	}
 	//1 : tree is emtpy
 	//2 : Tree not empty, target < than root
@@ -143,8 +143,8 @@ namespace DS {
 	template<typename Item>
 	void bstree<Item>::bst_remove_max(binary_tree_node<Item>*& root_ptr, Item& removed)
 	{
-		if (root_ptr == nullptr)
-			return;
+		removed = maxNode(root_ptr);
+		bst_remove(removed->data(), root_ptr);
 	}
 
 
